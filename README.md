@@ -1,36 +1,44 @@
 # File Ingest to Snowflake - Streamlit App
 
-A comprehensive Streamlit application that uploads files (CSV, TXT, Excel, PDF) to Snowflake stages and processes them into tables. The application runs entirely on Snowflake using Streamlit in Snowflake with Snowpark integration.
+A modern Streamlit application for uploading and processing files (CSV, TXT, Excel, PDF) into Snowflake tables. Features an intuitive 3-step workflow with automatic navigation, bulk operations, and real-time progress tracking.
 
 ## Table of Contents
 - [Features](#features)
 - [Quick Start](#quick-start)
+- [User Interface](#user-interface)
 - [Architecture](#architecture)
-- [Detailed Setup](#detailed-setup)
-- [Usage Guide](#usage-guide)
+- [Setup Guide](#setup-guide)
+- [Usage](#usage)
 - [File Processing](#file-processing)
-- [Deployment](#deployment)
 - [Troubleshooting](#troubleshooting)
+- [Technical Details](#technical-details)
 
 ---
 
 ## Features
 
-### Core Functionality
-- ✅ **Multi-File Upload**: Upload multiple CSV, TXT, Excel (XLSX, XLS), and PDF files simultaneously
-- ✅ **Intelligent Processing**: Automatically convert files to Snowflake tables based on file type
-- ✅ **Excel Multi-Sheet**: Each sheet in Excel files creates a separate table (e.g., `FILE_SHEET1`, `FILE_SHEET2`)
-- ✅ **Stage Management**: Files move through lifecycle stages (Raw → Processing → Completed/Error)
-- ✅ **Source Tracking**: Each table row includes `SOURCE_FILE_NAME` column for data lineage
-- ✅ **Original Filenames**: Files preserve their original names (no random temp names)
+### 🚀 Core Functionality
+- **Multi-File Upload**: Upload multiple files simultaneously (CSV, TXT, Excel, PDF)
+- **3-Step Workflow**: Upload → Process → View Tables with automatic navigation
+- **Bulk Operations**: Process or clear all files at once with progress tracking
+- **Excel Multi-Sheet Support**: Each Excel sheet becomes a separate table
+- **Stage Management**: Files move through lifecycle stages (Raw → Processing → Completed/Error)
+- **Real-Time Progress**: Live progress bars and status updates
+- **Source Tracking**: Every table includes `SOURCE_FILE_NAME` column for lineage
 
-### Advanced Features
-- 🗑️ **File Deletion**: Delete files from any stage individually or in bulk
-- ⚙️ **Bulk Processing**: Process all files at once with progress tracking
-- 🔄 **Auto-Refresh**: UI updates automatically after operations
-- 🔧 **Snowpark Integration**: Native Snowflake operations (no PUT/GET restrictions)
-- 📊 **Progress Tracking**: Visual progress bars for uploads and processing
-- ⚠️ **Error Handling**: Failed files automatically moved to error stage
+### ✨ UI/UX Features
+- **Automatic Navigation**: Moves to next step after successful completion
+- **Compact Metrics**: Clean, space-efficient summary cards
+- **Progress Display**: Single-line status updates for each file being processed
+- **Responsive Layout**: Full-width display with optimized spacing
+- **Visual Feedback**: Balloons 🎈 and success messages on completion
+
+### 🔧 Technical Features
+- **Snowpark Integration**: Native Snowflake operations (no PUT/GET restrictions)
+- **Session State Management**: Persistent file tracking across reruns
+- **Error Handling**: Failed files automatically move to error stage
+- **Original Filenames**: Files preserve their actual names (no temp names)
+- **Auto-Refresh**: UI updates automatically after operations
 
 ---
 
@@ -38,42 +46,92 @@ A comprehensive Streamlit application that uploads files (CSV, TXT, Excel, PDF) 
 
 ### Prerequisites
 - Snowflake account with appropriate permissions
-- Snow CLI installed (or use Snowsight for deployment)
+- Snow CLI installed (optional - can deploy via Snowsight)
 - Python 3.11+ (for local development)
 
 ### 5-Minute Setup
 
-1. **Clone or download this repository**
+**Option 1: Deploy via Snowsight (Easiest - No CLI needed)**
+1. Go to https://app.snowflake.com
+2. Run SQL scripts in order:
+   - `setup_database.sql` - Creates database and schema
+   - `setup_stages.sql` - Creates the 4 stages
+3. Navigate to **Streamlit** → **+ Streamlit App**
+4. Name it `FILE_INGEST_APP`
+5. Copy/paste contents of `app.py`
+6. Upload `environment.yml`
+7. Click **Run**
 
-2. **Deploy to Snowflake** (choose one method):
+**Option 2: Automated Script**
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
 
-   **Option A: Automated Script**
-   ```bash
-   chmod +x deploy.sh
-   ./deploy.sh
-   ```
+**Option 3: Manual Python Script**
+```bash
+pip install snowflake-connector-python
+python3 manual_deploy.py
+```
 
-   **Option B: Snowsight (Recommended - No CLI needed)**
-   1. Go to https://app.snowflake.com
-   2. Create `FILE_INGEST_DB` database and `PUBLIC` schema
-   3. Run SQL scripts: `setup_stages.sql`, `stored_procedures.sql`
-   4. Navigate to **Streamlit** → **Create Streamlit App**
-   5. Name it `FILE_INGEST_APP`
-   6. Copy/paste contents of `app.py`
-   7. Upload `environment.yml`
-   8. Click **"Run"**
+### Access Your App
+- Find it in Snowsight under **Streamlit**
+- Or use: `snow streamlit get-url FILE_INGEST_APP`
 
-   **Option C: Python Script**
-   ```bash
-   pip install snowflake-connector-python
-   python3 manual_deploy.py
-   ```
+---
 
-3. **Access the app**
-   - Find your app in Snowsight under **Streamlit**
-   - Or use: `snow streamlit get-url FILE_INGEST_APP`
+## User Interface
 
-4. **Start uploading files!**
+### Workflow Overview
+```
+Step 1: Upload Files → Step 2: Process Files → Step 3: View Tables
+        ↓                      ↓                        ↓
+    Select & Upload      Convert to Tables      Query Your Data
+```
+
+### Step 1: Upload Files
+```
+┌─────────────────────────────────────────────────────────┐
+│ 📤 Step 1: Upload Files                                 │
+├─────────────────────────────────────────────────────────┤
+│ ┌────────────┐ ┌────────────┐ ┌───────────────────────┐│
+│ │📁 Files: 5 │ │💾 Size:... │ │📤 Upload All to Raw...││
+│ └────────────┘ └────────────┘ └───────────────────────┘│
+├─────────────────────────────────────────────────────────┤
+│ [File Selection Widget]                                 │
+├─────────────────────────────────────────────────────────┤
+│ 📋 Selected Files:                                      │
+│ • file1.xlsx                                            │
+│ • file2.csv                                             │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Process Files
+```
+┌─────────────────────────────────────────────────────────┐
+│ 🚀 Bulk Operations                                      │
+│ [⚙️ Process All Files] [🗑️ Clear All] 💡 Tip...       │
+├─────────────────────────────────────────────────────────┤
+│ ━━━━━━━━━━━━━━━━━ 60% Complete                         │
+├─────────────────────────────────────────────────────────┤
+│ ℹ️ Processing 730803_CompanyName3_Tokio... (3/5)       │
+├─────────────────────────────────────────────────────────┤
+│ 📄 Files (Individual actions)                           │
+│ • file1.xlsx  [⚙️] [🗑️]                                 │
+│ • file2.csv   [⚙️] [🗑️]                                 │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Step 3: View Tables
+```
+┌─────────────────────────────────────────────────────────┐
+│ 📊 View Tables                                          │
+│                                                         │
+│ Select a table: [Dropdown]                             │
+│ Preview first 100 rows                                  │
+│ [Table Preview]                                         │
+└─────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -93,127 +151,119 @@ A comprehensive Streamlit application that uploads files (CSV, TXT, Excel, PDF) 
                                     └───────────┘
 ```
 
-### Stages
-- **RAW_STAGE**: Initial upload location for all files
-- **PROCESSING_STAGE**: Temporary storage during file processing (optional, cleaned up)
-- **COMPLETED_STAGE**: Successfully processed files (reference only)
-- **ERROR_STAGE**: Files that failed processing for debugging
-
 ### Data Flow
-1. User uploads file(s) → RAW_STAGE
-2. User clicks "Process" → File moves to PROCESSING_STAGE
-3. File is parsed and table is created with `SOURCE_FILE_NAME` column
-4. On success → File removed from stages (table contains the data)
-5. On failure → File moved to ERROR_STAGE for review
+1. **Upload**: Files → RAW_STAGE
+2. **Process**: RAW_STAGE → PROCESSING_STAGE → Parse → Create Table
+3. **Success**: File removed from stages, data in table
+4. **Failure**: File → ERROR_STAGE for debugging
+5. **Auto-Navigate**: Success → Move to next step
+
+### Stages Explained
+- **RAW_STAGE**: Initial upload location
+- **PROCESSING_STAGE**: Temporary storage during processing
+- **COMPLETED_STAGE**: Archive of successfully processed files
+- **ERROR_STAGE**: Failed files for debugging
 
 ---
 
-## Detailed Setup
+## Setup Guide
 
-### 1. Install Snow CLI (Optional)
+### Database Setup
 
-```bash
-# Using pip
-pip install snowflake-cli-labs
+Run these SQL scripts in order:
 
-# Or using Homebrew (macOS)
-brew install snowflake-cli
+```sql
+-- 1. Create database and schema
+-- From: setup_database.sql
+CREATE DATABASE IF NOT EXISTS FILE_INGEST_DB;
+USE DATABASE FILE_INGEST_DB;
+CREATE SCHEMA IF NOT EXISTS PUBLIC;
 
-# Verify installation
-snow --version
+-- 2. Create stages
+-- From: setup_stages.sql
+CREATE OR REPLACE STAGE RAW_STAGE;
+CREATE OR REPLACE STAGE PROCESSING_STAGE;
+CREATE OR REPLACE STAGE COMPLETED_STAGE;
+CREATE OR REPLACE STAGE ERROR_STAGE;
+
+-- 3. (Optional) Create helper procedures
+-- From: stored_procedures.sql and file_management.sql
 ```
 
-### 2. Snowflake Permissions
+### Required Permissions
 
-Ensure your Snowflake role has:
-- `CREATE DATABASE` permission (or use existing database)
-- `CREATE SCHEMA` permission
-- `CREATE STAGE` permission
-- `CREATE TABLE` permission
-- `CREATE PROCEDURE` permission
-- `CREATE STREAMLIT` permission
+Your Snowflake role needs:
+- `CREATE DATABASE` (or use existing database)
+- `CREATE SCHEMA`
+- `CREATE STAGE`
+- `CREATE TABLE`
+- `CREATE STREAMLIT`
 - `USAGE` on warehouse
 
-### 3. Database Setup
+### Deploy Streamlit App
 
-Run the SQL scripts in order:
+**Via Snowsight:**
+1. Navigate to **Streamlit** → **+ Streamlit App**
+2. Configure:
+   - Name: `FILE_INGEST_APP`
+   - Database: `FILE_INGEST_DB`
+   - Schema: `PUBLIC`
+   - Warehouse: `COMPUTE_WH`
+3. Copy entire `app.py` content
+4. Upload `environment.yml`
+5. Click **Run**
 
+**Via Snow CLI:**
 ```bash
-# Option A: Using Snow CLI
-snow sql -f setup_database.sql
-snow sql -f setup_stages.sql
-snow sql -f stored_procedures.sql
-snow sql -f file_management.sql
-
-# Option B: Using deploy script
-./deploy.sh
-
-# Option C: Manual execution in Snowsight
-# Copy/paste each SQL file content into a worksheet and execute
-```
-
-### 4. Deploy the Streamlit App
-
-**Method 1: Deploy Script (if Snow CLI working)**
-```bash
-./deploy.sh --app-only  # Deploy only app, skip SQL setup
-```
-
-**Method 2: Snowsight (Easiest)**
-1. Navigate to Snowsight: https://app.snowflake.com
-2. Go to **Streamlit** → **+ Streamlit App**
-3. Set:
-   - **Name**: `FILE_INGEST_APP`
-   - **Location**: `FILE_INGEST_DB.PUBLIC.STREAMLIT_STAGE`
-   - **Warehouse**: `COMPUTE_WH`
-4. Copy entire contents of `app.py` into the editor
-5. Upload `environment.yml` when prompted
-6. Click **"Run"**
-
-**Method 3: Python Script**
-```bash
-python3 manual_deploy.py
-# Enter your Snowflake credentials when prompted
+snow streamlit deploy \
+  --file app.py \
+  --name FILE_INGEST_APP \
+  --database FILE_INGEST_DB \
+  --schema PUBLIC \
+  --warehouse COMPUTE_WH
 ```
 
 ---
 
-## Usage Guide
+## Usage
 
-### Tab 1: Upload Files
+### Workflow: Upload → Process → View
 
-1. **Select Files**: Click "Choose files to upload" and select one or multiple files
-   - Supported: CSV, TXT, Excel (XLSX, XLS), PDF
-   - Multiple files can be selected at once
+#### Step 1: Upload Files
 
-2. **Review Files**: Check file names and sizes in the preview
+1. Click **Step 1: Upload Files** in sidebar
+2. Select files using the file picker
+3. Review summary (file count, total size)
+4. Click **📤 Upload All to Raw Stage**
+5. Watch progress bar and status updates
+6. ✅ Auto-navigates to **Step 2: Process Files** on success
 
-3. **Upload**: Click "Upload All to Raw Stage"
-   - Progress bar shows upload status
-   - Success/failure messages for each file
+#### Step 2: Process Files
 
-### Tab 2: Process Files
+**Bulk Processing (Recommended):**
+1. Click **⚙️ Process All Files** button
+2. Watch real-time processing status
+3. See progress: "Processing filename... (2/5)"
+4. ✅ Auto-navigates to **Step 3: View Tables** when complete
 
-#### Single File Processing
-1. **Select File**: Choose a file from the dropdown (shows files in RAW_STAGE)
-2. **Options**:
-   - 🗑️ **Delete File**: Remove file from raw stage
-   - ⚙️ **Process File**: Convert file to table
+**Individual File Processing:**
+1. Find file in the Files table
+2. Click **⚙️** button next to specific file
+3. File processes and table is created
+4. Page refreshes to show updated file list
 
-#### Bulk Operations
-- **🗑️ Clear All Files from Raw Stage**: Delete all files at once
-- **⚙️ Process All Files**: Process all files sequentially with progress tracking
+**Clear Files:**
+- Click **🗑️ Clear All Files** to delete all files from RAW_STAGE
+- Or click **🗑️** next to individual files
 
-**Processing Details**:
-- CSV/TXT: Creates table with all columns + `SOURCE_FILE_NAME`
-- Excel: Creates separate table for each sheet (e.g., `FILENAME_SHEET1`, `FILENAME_SHEET2`)
-- PDF: Creates metadata table (full text extraction requires additional setup)
+#### Step 3: View Tables
 
-### Tab 3: View and Manage Files
-
-- **View**: See files across all 4 stages (RAW, PROCESSING, COMPLETED, ERROR)
-- **Delete**: Click 🗑️ button next to any file to remove it
-- **Refresh**: Page auto-refreshes after deletions
+1. Select table from dropdown
+2. View first 100 rows
+3. Query tables directly in Snowflake:
+   ```sql
+   SELECT * FROM FILE_INGEST_DB.PUBLIC.YOUR_TABLE_NAME;
+   ```
 
 ---
 
@@ -224,307 +274,170 @@ python3 manual_deploy.py
 Input:  sales_data.csv
 Output: Table SALES_DATA
 ```
-- Automatically detects delimiter (comma, tab, pipe, etc.)
+- Auto-detects delimiter (comma, tab, pipe, etc.)
 - Infers schema from data
 - Handles quoted fields and special characters
 - Adds `SOURCE_FILE_NAME` column
 
-### Excel Files (Multi-Sheet Support)
+### Excel Files (Multi-Sheet)
 ```
-Input:  financial_report.xlsx (3 sheets: Q1, Q2, Q3)
+Input:  quarterly_report.xlsx (Sheets: Q1, Q2, Q3)
 Output: 
-  - Table FINANCIAL_REPORT_Q1
-  - Table FINANCIAL_REPORT_Q2  
-  - Table FINANCIAL_REPORT_Q3
+  - QUARTERLY_REPORT_Q1
+  - QUARTERLY_REPORT_Q2
+  - QUARTERLY_REPORT_Q3
 ```
-- Processes each sheet as a separate table
+- Each sheet becomes a separate table
 - Skips empty sheets
-- Preserves data types from Excel
-- Each table includes `SOURCE_FILE_NAME` column
+- Preserves data types
+- All tables include `SOURCE_FILE_NAME`
 
 ### PDF Files
 ```
 Input:  document.pdf
-Output: Table DOCUMENT (metadata only)
+Output: DOCUMENT (metadata table)
 ```
-- Creates metadata table with file info
-- Includes: file name, size, processed timestamp
-- Note: Full text extraction requires external functions or UDFs
+- Creates metadata table
+- Includes: filename, size, timestamp
+- Note: Full text extraction requires additional setup
 
-### Table Naming Convention
-- Original filename is sanitized for Snowflake
-- Special characters replaced with underscores
+### Table Naming
+- Filenames sanitized for Snowflake compatibility
+- Special characters → underscores
 - Extension removed
 - Converted to uppercase
 
-**Examples**:
+**Examples:**
 - `my-data-file.csv` → `MY_DATA_FILE`
 - `Sales Report 2024.xlsx` → `SALES_REPORT_2024`
 - `751054_Company_Data.txt` → `751054_COMPANY_DATA`
 
 ---
 
-## Deployment
-
-### Full Deployment (First Time)
-```bash
-./deploy.sh
-```
-This will:
-1. Create `FILE_INGEST_DB` database and `PUBLIC` schema
-2. Create all 4 stages (RAW, PROCESSING, COMPLETED, ERROR)
-3. Create stored procedures (optional - app uses Snowpark)
-4. Deploy Streamlit app to Snowflake
-
-### Update App Only
-```bash
-./deploy.sh --app-only
-```
-Skips SQL setup, only redeploys the Streamlit app (useful for code updates)
-
-### Manual Deployment via Python
-```bash
-python3 manual_deploy.py
-```
-Interactive script that prompts for credentials and deploys the app.
-
-### Verify Deployment
-```bash
-# List Streamlit apps
-snow streamlit list
-
-# Get app URL
-snow streamlit get-url FILE_INGEST_APP
-
-# Check stages exist
-snow sql -q "SHOW STAGES IN FILE_INGEST_DB.PUBLIC"
-
-# Check tables created
-snow sql -q "SHOW TABLES IN FILE_INGEST_DB.PUBLIC"
-```
-
----
-
 ## Troubleshooting
+
+### Upload Issues
+
+**Problem**: Upload button doesn't appear after selecting files
+**Solution**: 
+- Fixed in current version - button now appears immediately
+- Files are stored in session state and persist across reruns
+- Clear browser cache if issues persist
+
+**Problem**: File upload fails
+**Solutions**:
+- Check file size limits
+- Verify stage permissions: `GRANT READ, WRITE ON STAGE RAW_STAGE TO ROLE YOUR_ROLE`
+- Ensure supported file type (CSV, TXT, XLSX, XLS, PDF)
+
+### Processing Issues
+
+**Problem**: Processing fails for Excel files
+**Solutions**:
+- Verify sheets contain data (not just headers)
+- Check for merged cells or complex formatting
+- Ensure sheets are not password protected
+
+**Problem**: CSV file not parsing correctly
+**Solutions**:
+- Verify UTF-8 encoding
+- Check delimiter (comma, tab, pipe)
+- Ensure no extra blank lines at end of file
+
+**Problem**: Table already exists
+**Solution**: App uses `CREATE OR REPLACE TABLE` - should not occur. If it does:
+```sql
+DROP TABLE IF EXISTS FILE_INGEST_DB.PUBLIC.YOUR_TABLE_NAME;
+```
 
 ### Connection Issues
 
 **Problem**: Cannot connect to Snowflake
 **Solutions**:
-- Verify account identifier is correct (e.g., `xy12345.us-east-1`)
-- Check username and password
-- Ensure warehouse exists and is running
-- Verify network connectivity (VPN, firewall)
-- When running in Snowflake, the app uses native session (no credentials needed)
-
-### Upload Errors
-
-**Problem**: File upload fails
-**Solutions**:
-- Check file size (Snowflake stages have size limits)
-- Verify stage permissions: `GRANT READ, WRITE ON STAGE RAW_STAGE TO ROLE YOUR_ROLE`
-- Ensure file format is supported (CSV, TXT, XLSX, XLS, PDF)
-- Check for special characters in filename
-
-**Problem**: "Unsupported statement type 'PUT_FILES'" error
-**Solution**: This is fixed in the current version. The app now uses Snowpark's `session.file.put()` which is supported in Snowflake's Streamlit environment.
-
-**Problem**: Files show random names like `tmpXYZ123.csv`
-**Solution**: This is fixed in the current version. Files now preserve their original names.
-
-### Processing Errors
-
-**Problem**: File processing fails
-**Solutions**:
-- Check file format matches expected structure
-- For CSV: Ensure proper delimiter and encoding (UTF-8)
-- For Excel: Verify sheets are not empty or corrupted
-- Check error messages in the app UI
-- Review files in ERROR_STAGE for problematic files
-- View Streamlit logs in Snowsight for detailed errors
-
-**Problem**: Excel file creates empty tables
-**Solutions**:
-- Verify Excel file has data (not just headers)
-- Check if sheets are hidden in Excel
-- Try converting to CSV manually to verify data structure
-
-**Problem**: Table already exists error
-**Solution**: The app uses `CREATE OR REPLACE TABLE`, so this shouldn't occur. If it does, manually drop the table:
-```sql
-DROP TABLE IF EXISTS FILE_INGEST_DB.PUBLIC.YOUR_TABLE_NAME;
-```
-
-### Deployment Issues
-
-**Problem**: Snow CLI not found or broken
-**Solutions**:
-- Reinstall Snow CLI: `brew reinstall snowflake-cli` or `pip install --upgrade snowflake-cli-labs`
-- Use alternative deployment: Python script (`manual_deploy.py`) or Snowsight UI
-
-**Problem**: Database creation fails
-**Solutions**:
-- Verify you have CREATE DATABASE permission or ACCOUNTADMIN role
-- Manually create database:
-  ```sql
-  CREATE DATABASE IF NOT EXISTS FILE_INGEST_DB;
-  USE DATABASE FILE_INGEST_DB;
-  CREATE SCHEMA IF NOT EXISTS PUBLIC;
-  ```
-
-**Problem**: Streamlit app won't start
-**Solutions**:
-- Check warehouse is running: `ALTER WAREHOUSE COMPUTE_WH RESUME;`
-- Verify `environment.yml` is properly uploaded
-- Check Python package versions in `environment.yml`
-- Review app logs in Snowsight under Streamlit → App → Logs
+- When running in Snowflake, app uses native session (no credentials needed)
+- For local development, check `.streamlit/secrets.toml`
+- Verify warehouse is running: `ALTER WAREHOUSE COMPUTE_WH RESUME;`
 
 ### Performance Issues
 
-**Problem**: Large files take too long to process
+**Problem**: Large files process slowly
 **Solutions**:
-- Use larger warehouse: Change `COMPUTE_WH` to `LARGE_WH` or bigger
+- Use larger warehouse (LARGE_WH, X-LARGE_WH)
 - Process files in smaller batches
-- For very large Excel files, convert to CSV first
-- Consider breaking large files into smaller chunks
-
-**Problem**: Bulk processing is slow
-**Solutions**:
-- This is expected as files process sequentially
-- Each file waits for the previous to complete
-- For faster processing, consider using Snowflake tasks or Snowpipe
+- Convert large Excel files to CSV first
+- Consider breaking into smaller files
 
 ---
 
 ## Technical Details
 
-### Snowpark Integration
+### Technology Stack
+- **Frontend**: Streamlit 1.50.0
+- **Backend**: Snowflake Snowpark
+- **File Processing**: Pandas, OpenPyXL, PyPDF2
+- **Deployment**: Streamlit in Snowflake (native)
 
-The app automatically detects if it's running in Snowflake and uses Snowpark native methods:
+### Key Features Implementation
 
-**File Upload**:
+**Session State Management:**
 ```python
+# Files persist across reruns
+st.session_state.staged_files = file_info_list
+st.session_state.current_page = "Step 2: Process Files"
+```
+
+**Automatic Navigation:**
+```python
+if uploaded_count == len(file_info_list):
+    st.balloons()
+    time.sleep(1.5)  # Show success message
+    st.session_state.current_page = "Step 2: Process Files"
+    st.rerun()
+```
+
+**Snowpark Integration:**
+```python
+# Get native Snowflake session
 session = get_active_session()
-session.file.put(tmp_path, f"@{stage_name}", auto_compress=False, overwrite=True)
-```
 
-**DataFrame to Table**:
-```python
-session.write_pandas(
-    df, 
-    table_name,
-    database="FILE_INGEST_DB",
-    schema="PUBLIC",
-    overwrite=True,
-    auto_create_table=True
-)
-```
+# Upload with original filename
+session.file.put(tmp_path, f"@{stage_name}", 
+                 auto_compress=False, overwrite=True)
 
-**Benefits**:
-- No PUT/GET SQL restrictions
-- Direct DataFrame-to-table operations (faster)
-- Automatic session management
-- Better integration with Snowflake environment
+# Write DataFrame to table
+session.write_pandas(df, table_name,
+                    database="FILE_INGEST_DB",
+                    schema="PUBLIC",
+                    overwrite=True)
+```
 
 ### File Structure
 ```
-fileingest/
-├── app.py                    # Main Streamlit application (867 lines)
-├── environment.yml           # Conda environment for Snowflake
-├── requirements.txt          # Python dependencies
-├── snowflake.yml            # Snow CLI configuration
-├── app.toml                 # Application metadata
-├── deploy.sh                # Automated deployment script
-├── manual_deploy.py         # Python deployment script
-├── setup_database.sql       # Database and schema setup
-├── setup_stages.sql         # Stage creation script
-├── stored_procedures.sql    # SQL procedures (optional)
-├── file_management.sql      # Helper procedures (optional)
-├── .streamlit/
-│   ├── config.toml         # Streamlit configuration
-│   └── secrets.toml        # Local credentials (not used in Snowflake)
-├── samples/                 # Sample data files
-└── README.md               # This file
+streamlit_file_extract/
+├── app.py                   # Main application (2100+ lines)
+├── environment.yml          # Conda dependencies for Snowflake
+├── requirements.txt         # Python package dependencies
+├── snowflake.yml           # Snow CLI configuration
+├── deploy.sh               # Automated deployment script
+├── manual_deploy.py        # Python deployment alternative
+├── setup_database.sql      # Database creation
+├── setup_stages.sql        # Stage setup
+├── stored_procedures.sql   # Optional SQL procedures
+├── file_management.sql     # Helper procedures
+└── README.md              # This file
 ```
 
 ### Dependencies
-
-**Python Packages** (from `requirements.txt`):
-- `streamlit==1.50.0` - Streamlit framework
-- `snowflake-connector-python>=3.0.0` - Snowflake connector
-- `snowflake-snowpark-python>=1.42.0` - Snowpark API
-- `pandas>=2.0.0` - Data manipulation
-- `openpyxl>=3.1.0` - Excel file handling
-- `PyPDF2>=3.0.0` - PDF file handling
-
-### Key Functions
-
-- `upload_file_to_stage()` - Upload files with original filenames preserved
-- `delete_file_from_stage()` - Remove files from any stage
-- `process_csv_file()` - Convert CSV/TXT to tables using `write_pandas()`
-- `process_excel_file()` - Multi-sheet Excel processing
-- `process_pdf_file()` - PDF metadata extraction
-- `get_stage_files()` - List files in a stage
-- `clean_table_name()` - Sanitize filenames for valid table names
-
----
-
-## Usage Examples
-
-### Example 1: Simple CSV Upload and Process
-```
-1. Tab 1: Upload sales_data.csv
-2. Tab 2: Select sales_data.csv
-3. Tab 2: Click "⚙️ Process File"
-4. Result: Table SALES_DATA created
-
-Query the table:
-SELECT * FROM FILE_INGEST_DB.PUBLIC.SALES_DATA
-WHERE SOURCE_FILE_NAME = 'sales_data.csv'
-LIMIT 10;
-```
-
-### Example 2: Excel Multi-Sheet Processing
-```
-1. Tab 1: Upload quarterly_report.xlsx (has sheets: Q1, Q2, Q3, Q4)
-2. Tab 2: Click "⚙️ Process File"
-3. Result: 4 tables created:
-   - QUARTERLY_REPORT_Q1
-   - QUARTERLY_REPORT_Q2
-   - QUARTERLY_REPORT_Q3
-   - QUARTERLY_REPORT_Q4
-
-Query all sheets:
-SELECT 'Q1' as Quarter, * FROM QUARTERLY_REPORT_Q1
-UNION ALL
-SELECT 'Q2' as Quarter, * FROM QUARTERLY_REPORT_Q2
-UNION ALL
-SELECT 'Q3' as Quarter, * FROM QUARTERLY_REPORT_Q3
-UNION ALL
-SELECT 'Q4' as Quarter, * FROM QUARTERLY_REPORT_Q4;
-```
-
-### Example 3: Bulk Upload and Process
-```
-1. Tab 1: Select 10 CSV files (sales_jan.csv through sales_oct.csv)
-2. Tab 1: Click "Upload All to Raw Stage"
-3. Tab 2: Click "⚙️ Process All Files"
-4. Result: 10 tables created (SALES_JAN through SALES_OCT)
-
-Query all months:
-SELECT * FROM SALES_JAN
-UNION ALL
-SELECT * FROM SALES_FEB
--- ... etc
-```
-
-### Example 4: Error Handling and Cleanup
-```
-1. Upload a corrupted file
-2. Try to process it → Moves to ERROR_STAGE
-3. Tab 3: Navigate to Error Stage column
-4. Click 🗑️ to delete the bad file
-5. Tab 2: Click "🗑️ Clear All Files" to clean up RAW_STAGE
+```yaml
+# environment.yml
+channels:
+  - snowflake
+dependencies:
+  - python=3.11
+  - streamlit=1.50.0
+  - snowflake-snowpark-python=1.42.0
+  - pandas=2.0.0
+  - openpyxl=3.1.0
 ```
 
 ---
@@ -532,32 +445,97 @@ SELECT * FROM SALES_FEB
 ## Best Practices
 
 ### File Preparation
-- Use UTF-8 encoding for CSV/TXT files
-- Ensure Excel files don't have merged cells or complex formatting
+- Use UTF-8 encoding for text files
+- Avoid merged cells in Excel
 - Keep filenames simple (alphanumeric, underscores, hyphens)
-- Test with small files first before bulk uploads
+- Test with small files first
 
 ### Processing Strategy
-- Process smaller batches (10-20 files) at a time
+- Use bulk operations for multiple files
+- Process 10-20 files at a time for optimal performance
 - Monitor warehouse usage during large operations
-- Use appropriate warehouse size for file volume
-- Clean up stages regularly to avoid clutter
+- Clean up stages regularly
 
 ### Production Recommendations
 - Implement file validation before upload
-- Add custom error handling and notifications
-- Set up monitoring for failed files in ERROR_STAGE
-- Consider Snowpipe for continuous file ingestion
-- Implement data quality checks after table creation
-- Use Snowflake's COPY INTO for very large files
-- Set up access controls and row-level security as needed
+- Set up monitoring for ERROR_STAGE
+- Use appropriate warehouse size for workload
+- Consider Snowpipe for continuous ingestion
+- Implement data quality checks post-processing
+- Set up access controls (RBAC)
 
 ### Security
-- Use OAuth or key-pair authentication instead of passwords
-- Implement role-based access control (RBAC)
-- Audit file uploads and processing activities
-- Encrypt sensitive data at rest and in transit
-- Regularly review and rotate credentials
+- Use OAuth or key-pair authentication
+- Implement role-based access control
+- Audit file operations via operation logs
+- Encrypt sensitive data
+- Regularly review permissions
+
+---
+
+## Examples
+
+### Example 1: Simple CSV Upload
+```
+1. Upload: sales_data.csv
+2. Process: Click "Process All Files"
+3. Query: SELECT * FROM SALES_DATA LIMIT 10;
+```
+
+### Example 2: Excel Multi-Sheet
+```
+1. Upload: quarterly_report.xlsx (4 sheets)
+2. Process: Creates 4 tables
+   - QUARTERLY_REPORT_Q1
+   - QUARTERLY_REPORT_Q2
+   - QUARTERLY_REPORT_Q3
+   - QUARTERLY_REPORT_Q4
+3. Query all: 
+   SELECT 'Q1' AS quarter, * FROM QUARTERLY_REPORT_Q1
+   UNION ALL
+   SELECT 'Q2' AS quarter, * FROM QUARTERLY_REPORT_Q2;
+```
+
+### Example 3: Bulk Processing
+```
+1. Upload: 10 files (sales_jan.csv through sales_oct.csv)
+2. Click: "Process All Files"
+3. Watch: Progress updates for each file
+4. Result: 10 tables created
+5. Auto-navigate: Moves to View Tables
+```
+
+---
+
+## Version History
+
+**Version 3.0** (November 14, 2025)
+- ✅ Automatic navigation between workflow steps
+- ✅ Compact metric cards with reduced whitespace
+- ✅ Single-line processing status (full width display)
+- ✅ Upload button positioned before file selector
+- ✅ Session state management for file persistence
+- ✅ Improved UI/UX with real-time updates
+
+**Version 2.0**
+- Multi-file upload support
+- Bulk processing operations
+- Excel multi-sheet support
+- Snowpark integration
+
+**Version 1.0**
+- Initial release
+- Basic file upload and processing
+
+---
+
+## Support
+
+For issues or questions:
+1. Review this README thoroughly
+2. Check the Troubleshooting section
+3. Examine Streamlit logs in Snowsight
+4. Test with sample files
 
 ---
 
@@ -567,16 +545,7 @@ This project is provided as-is for demonstration and educational purposes.
 
 ---
 
-## Support and Contribution
-
-For issues, questions, or contributions:
-- Review this README thoroughly
-- Check the Troubleshooting section
-- Examine Streamlit logs in Snowsight
-- Test with sample files first
-
----
-
-**Version**: 2.0  
+**Application**: File Ingest to Snowflake  
+**Version**: 3.0  
 **Last Updated**: November 14, 2025  
-**Features**: Multi-file upload, bulk processing, file deletion, Snowpark integration, Excel multi-sheet support
+**Key Features**: 3-Step Workflow, Auto-Navigation, Bulk Operations, Multi-Sheet Excel, Real-Time Progress
