@@ -2,6 +2,8 @@
 
 A modern Streamlit application for uploading and processing files (CSV, TXT, Excel, PDF) into Snowflake tables. Features an intuitive 3-step workflow with automatic navigation, bulk operations, and real-time progress tracking.
 
+![File Extract Demo](File_Extract.gif)
+
 ## Table of Contents
 - [Features](#features)
 - [Quick Start](#quick-start)
