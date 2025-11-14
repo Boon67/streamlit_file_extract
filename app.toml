@@ -1,0 +1,14 @@
+[application]
+name = "File Extract Tool"
+role = "ACCOUNTADMIN"
+warehouse = "COMPUTE_WH"
+database = "FILE_EXTRACT_DB"
+schema = "PUBLIC"
+
+[application.package]
+name = "FILE_EXTRACT_PACKAGE"
+
+[application.source]
+stage = "STREAMLIT_STAGE"
+main_file = "app.py"
+

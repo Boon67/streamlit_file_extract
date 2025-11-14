@@ -1,0 +1,11 @@
+name: file_extract_env
+channels:
+  - snowflake
+dependencies:
+  - python
+  - streamlit
+  - snowflake-snowpark-python
+  - pandas
+  - openpyxl
+  - pypdf2
+

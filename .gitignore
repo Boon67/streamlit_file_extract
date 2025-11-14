@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Streamlit
+# Note: .streamlit/secrets.toml is included in the repo as a minimal file
+# for Snowflake deployment (it's not used but prevents errors)
+.streamlit/secrets.toml.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Snowflake
+*.log
+snowflake_connection.json
+output/
+
+# Temporary/removed files
+FEATURES_UPDATE.md
+DEPLOYMENT_FIX.md
+QUICKSTART.md
+CHANGES_SUMMARY.txt
+quick_deploy.sh
+manual_deploy.py
+PROJECT_SUMMARY.txt
+
+samples
